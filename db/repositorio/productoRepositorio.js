@@ -1,54 +1,68 @@
-var array=[]
+import { conexion } from "../conexion.js"
 
-const crear = (producto)=>{
-   array.push(producto)
+const crear = async (producto)=>{
+   const connection = await conexion.clienteMySQL()
+   const query = "INSERT INTO producto SET ?"
+   await connection.query(query, producto)
+   connection.release()
 }
 
-const leer = ()=>{
-   return array
+const leer =  async()=>{
+   const connection = await conexion.clienteMySQL()
+   const [rows] = await connection.query("SELECT * FROM producto")
+   connection.release()
+   return rows
 }
 
-const detalle = (idproducto)=>{
-   
-   const producto = array.find(producto=>producto.idproducto ==  idproducto)
-
-      return producto ? producto : {}
+const detalle = async (idProducto)=>{
+   const connection = await conexion.clienteMySQL()
+   const query = "SELECT * FROM producto WHERE idProducto = ?"
+   const [rows] = await connection.query(query, [idProducto])
+   connection.release()
+   return rows[0] || {}
 }
 
-const actualizar = (productoDetalle)=>{
-   
-   const index = array.findIndex(producto=>producto.idproducto ==  productoDetalle.idproducto)
+const actualizar =  async (productoDetalle)=>{
+   const connection = await conexion.clienteMySQL()
+   const query = "UPDATE producto SET ?  WHERE idProducto = ?"
+   await connection.query(query, [productoDetalle, productoDetalle.idProducto])
+   connection.release()
+}
 
-   if (index != -1){
+const buscarProducto = async (idProducto)=>{
+   const connection = await conexion.clienteMySQL()
 
-      array[index]=productoDetalle
-      return array[index]
+   try {
+      const [rows, _] = await connection.query(
+         "SELECT * FROM producto WHERE idProducto = ?",
+         [idProducto]
+      )
+      return rows[0] || null
 
-   }else{
-
-      return {}
+   } catch (error) {
+      throw error
    }
-
-   // return producto ? producto : {}
 }
 
-const eliminar = (idproducto)=>{
-   
-   const index = array.findIndex(producto=>producto.idproducto ==  idproducto)
+const buscarPrograma = async (programa)=>{
+   const connection = await conexion.clienteMySQL()
+   try {
+      const [rows, _] = await connection.query(
+         "SELECT programa FROM producto",
+         [programa]
+      )
+      return rows[0] || null
 
-   if (index != -1){
-
-      array.splice(index, 1)
-
+   } catch (error) {
+      throw error
    }
-
 }
 
-const misProductos= (idUsuario)=>{
-
-   const losProductos= array.filter(producto => producto.usuarioEntity.idUsuario == idUsuario) 
-
-   return losProductos ? losProductos : []
+const eliminar =  async(idProducto)=>{
+   const connection = await conexion.clienteMySQL()
+   const query = "DELETE FROM producto WHERE idProducto = ?"
+   await connection.query(query, [idProducto])
+   connection.release()
 }
 
-export default {crear, leer, detalle, actualizar, eliminar, misProductos}
+export default {crear, leer, detalle, actualizar, eliminar, buscarProducto,buscarPrograma}

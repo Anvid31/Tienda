@@ -1,94 +1,93 @@
 import productoRepositorio from "../db/repositorio/productoRepositorio.js"
-import usuarioRepositorio from "../db/repositorio/usuarioRepositorio.js"
-import equipoRepositorio from "../db/repositorio/equipoRepositorio.js"
 import crypto from "crypto"
 
-const crearproducto = (producto, user)=>{
+const crearproducto = async (producto)=>{
 
-   return new Promise((resolver, rechazar)=>{
-
-      if(!producto.fecha || !producto.precio){
-         rechazar("Datos Vacios")
+   try {
+      if( !producto.programa || !producto.asignatura || !producto.corte || !producto.marcoContex || !producto.pregunta || !producto.opciones || !producto.clave || !producto.justificacion || !producto.docente || !producto.fecha){
+         rechazar("Datos Faltantes")
       }
 
-      const usuario = usuarioRepositorio.buscarUser(user)
-
-
       producto.idProducto=crypto.randomUUID()
-      producto.precio = "0"
-      producto.usuario=usuario
+      await productoRepositorio.crear(producto)
+      return await productoRepositorio.buscarProducto(producto.idProducto)
 
-      productoRepositorio.crear(producto)
-
-      resolver(productoRepositorio.detalle(producto.idProducto))
-      console.log("Producto servicio 1/4 listo")
-   })
+   } catch(error) {
+        console.log("An error has occurred: " + error);
+    }
+  
    
 }
 
-const leerproducto = () => {
+const leerproducto = async () => {
 
-   return new Promise( (resolver,rechazar)=>{
-      resolver(productoRepositorio.leer())
-      console.log("Producto servicio 2/4 listo")
+   try{
+      const prod = await productoRepositorio.leer()
 
-   })
+      if(!prod) {
+         throw new Error("No se puedo Leer esto")
+      }
+      return prod
+   } catch(error) {
+      throw error
+   }
  
 }
 
-const detalleproducto = (idProducto) => {
+const detalleproducto = async (idProducto) => {
 
-   return new Promise( (resolver,rechazar)=>{
-      resolver(productoRepositorio.detalle(idProducto))
-      console.log("Producto servicio 3/4 listo")
-   })
+   return await productoRepositorio.detalle(idProducto)
 
 } 
 
 
-const actualizarproducto = (idProducto, producto, user)=>{
+const actualizarproducto =  async (idProducto, producto)=>{
 
-   return new Promise((resolver, rechazar)=>{
 
-      if(!producto.fecha || !producto.precio){
-         rechazar("Datos Vacios")
+      if( !producto.programa || !producto.asignatura || !producto.corte || !producto.marcoContex || !producto.pregunta || !producto.opciones || !producto.clave || !producto.justificacion || !producto.docente || !producto.fecha){
+         throw new Error("Datos VACIOS")
       }
 
       const productoDetalle= productoRepositorio.detalle(idProducto)
-      const usuario = usuarioRepositorio.buscarUser(user)
-      
-      if(productoDetalle.usuario.idusuario != usuario.idusuario){
-         rechazar("No se puede actualizar")
-      }
 
+      productoDetalle.programa=producto.programa
+      productoDetalle.asignatura=producto.asignatura
+      productoDetalle.corte=producto.corte
+      productoDetalle.marcoContex=producto.marcoContex
+      productoDetalle.pregunta=producto.pregunta
+      productoDetalle.opciones=producto.opciones
+      productoDetalle.clave=producto.clave
+      productoDetalle.justificacion=producto.justificacion
+      productoDetalle.docente=producto.docente
       productoDetalle.fecha=producto.fecha
-      productoDetalle.precio=producto.precio
 
-      resolver(productoRepositorio.detalle(producto.idProducto))
-      console.log("Producto servicio 4/4 listo")
+      await productoRepositorio.actualizar(productoDetalle)
 
-   })
-   
+      return await productoRepositorio.detalle(productoDetalle.idProducto)
+
 }
-const eliminarproducto = (idProducto, user)=>{
 
-   return new Promise((resolver, rechazar)=>{
+const leerListaProductos = async (programa)=>{
+   try {
+      const u = await productoRepositorio.buscarPrograma(programa)
 
-      const productoDetalle= productoRepositorio.detalle(idProducto)
-      const usuario = usuarioRepositorio.buscarUser(user)
-      
-      if(productoDetalle.usuario.idusuario != usuario.idusuario){
-         rechazar("No se puede actualizar")
+      if(u == null){
+         throw new Error("No se encontro el Programa")
       }
 
 
-
-      resolver(productoRepositorio.eliminar(productoDetalle.idProducto))
-      console.log("Producto servicio 5/4 listo")
-   })
-   
+   } catch (error) {
+        console.log("An error has occurred: " + error);
+    }
 }
 
 
+ const eliminarproducto = async(idProducto)=>{
 
-export default {crearproducto, leerproducto, detalleproducto, actualizarproducto,eliminarproducto}
+   const productoDetalle = await productoRepositorio.detalle(idProducto)
+
+   return await productoRepositorio.eliminarProducto(productoDetalle.idProducto)
+   
+ }
+
+export default {crearproducto, leerproducto, detalleproducto, actualizarproducto, leerListaProductos, eliminarproducto}

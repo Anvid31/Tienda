@@ -3,113 +3,58 @@ import respuestaHTTP from "../utils/respuestaHTTP.js"
 import productoServicio from "../services/productoServicio.js"
 import { productoActualizarReqModel, productoCrearReqModel, productoDatosResModel } from "../models/productoModel.js"
 
-const router = Router()
 
-router.post("/",(req,res) =>{
-
-   const user= "Anvid"
-
-
-
-   productoServicio.crearproducto(new productoCrearReqModel(req.body), user) 
-
-
-   .then((producto) =>{
-      respuestaHTTP.exito(req,res,new productoDatosResModel(producto),201)
-   })
-
-   .catch((err)=>{
-      respuestaHTTP.error(req,res,err,"Error al crear paquete",400)
-      console.log(err)
-   })
- 
-})
-
-
-
-router.get("/",(req,res) =>{  // Obtener
-
-   productoServicio.leerproducto()
-
-   .then( Array=> {
-      let losProductos= []
-
-      Array.array.forEach( producto => {
-         losProductos.push(new productoDatosResModel(producto))
-      });
-
-      respuestaHTTP.exito(req,res,losProductos,200)
-   })
-
-   .catch(err=>{
-      respuestaHTTP.error(req,res,err,"ERROR AL LEER",500)
-   })
+const postProducto = async(req,res) =>{
    
-})
-
-router.get("/:id",(req,res) =>{  // Obtener
-
-   productoServicio.detalleproducto(req.params.id)
-
-   .then( producto=> {
+   try {
+      const productoReq = new productoCrearReqModel(req.body)
+      const product = await productoServicio.crearproducto(productoReq)
+      const productoRes = new productoDatosResModel(product)
+   } catch (error) {
+      respuestaHTTP.error(req,res,"Error al crear",err,400)
+   }
    
-      respuestaHTTP.exito(req,res,new  productoDatosResModel(producto),200)
-   })
+}
 
-   .catch(err=>{
-      respuestaHTTP.error(req,res,err,"Error al leer el detalle del producto",500)
-   })
-   
-})
+const getProducto = async(req,res) =>{  
 
-router.put("/:id",(req,res) =>{  // Obtener
+   try {
+      const product = await productoServicio.leerproducto(req.producto.sub)
+      const productoRes = new productoDatosResModel(product)
+      respuestaHTTP.exito(req,res,productoRes,201)
+      
+   } catch (error) {
+      respuestaHTTP.error(req,res,"Error al leer",err,400)
+   }
+}
 
-   const user= "Anvid"
+const detalleProducto= async(req,res)=>{
 
-   productoServicio.actualizarproducto(req.params.id, new productoActualizarReqModel(req.body),user)
+   try {
+      const producto = await productoServicio.detalleproducto(req.params.idProducto)
+      respuestaHTTP.exito(req,res,new productoDatosResModel(producto),200)
+   } catch (error) {
+      respuestaHTTP.error(req,res,"Error al leer en detalle",err,400)
+   }
+}
 
-   .then( producto=> {
-   
-      respuestaHTTP.exito(req,res,new  productoDatosResModel(producto),200)
-   })
+const putProducto = async(req,res)=>{
 
-   .catch(err=>{
-      respuestaHTTP.error(req,res,err,"Error al actualizar el producto",500)
-   })
-   
-})
+   try {
+      const producto = await productoServicio.actualizarproducto(req.params.idProducto, new productoActualizarReqModel)
+      respuestaHTTP.exito(req,res,new productoDatosResModel(producto),200)
+   } catch (error) {
+      respuestaHTTP.error(req,res,"Error al actualizar",err,400)
+   }
+}
 
-router.delete("/:id",(req,res) =>{  // Obtener
+const eliminarProducto = async(req,res)=>{
+   try {
+      const producto = await productoServicio.eliminarproducto(req.params.idProducto)
+      respuestaHTTP.exito(req,res,new productoDatosResModel(producto),200)
+   } catch (error) {
+      respuestaHTTP.error(req,res,"Error al actualizar",err,400)
+   }
+}
 
-   const user= "Anvid"
-
-   productoServicio.eliminarproducto(req.params.id,user)
-
-   .then( ()=> {  
-   
-      respuestaHTTP.exito(req,res,"Eliminado con exito",200)
-   })
-
-   .catch(err=>{
-      respuestaHTTP.error(req,res,err,"Error al eliminar el producto",500)
-   })
-   
-})
-
-
-
-
-
-// router.post("/",(req,res) =>{ // Crear
-//    // console.log(req.body)
-//    // console.log(req.query)
-
-//    if(req.query.error=="1"){
-//       respuestaHTTP.error(req,res,"Error al momento de Crear Producto ", "Error al Crear Producto", 200)
-//    }else{ 
-//       respuestaHTTP.exito(req, res, "Productos Creados",201)       
-//    }
-       
-// })
-
-export default router
+export default { postProducto, getProducto, detalleProducto, putProducto}
