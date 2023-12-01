@@ -4,12 +4,17 @@ import crypto from "crypto"
 const crearproducto = async (producto)=>{
 
    try {
-      if( !producto.programa || !producto.asignatura || !producto.corte || !producto.marcoContex || !producto.pregunta || !producto.opciones || !producto.clave || !producto.justificacion || !producto.docente || !producto.fecha){
-         rechazar("Datos Faltantes")
+      if( !producto.fecha || !producto.codigo || !producto.programa || !producto.asignatura ||
+          !producto.corte ||!producto.unidadAprendizaje|| !producto.competenciaEvaluadora ||
+          !producto.marcoContex || !producto.pregunta || !producto.a || !producto.b || !producto.c ||
+          !producto.clave || !producto.evidencia || !producto.justificacion || !producto.diseñado ){
+         console.log("Datos Faltantes")
       }
 
       producto.idProducto=crypto.randomUUID()
+      
       await productoRepositorio.crear(producto)
+
       return await productoRepositorio.buscarProducto(producto.idProducto)
 
    } catch(error) {
@@ -44,22 +49,34 @@ const detalleproducto = async (idProducto) => {
 const actualizarproducto =  async (idProducto, producto)=>{
 
 
-      if( !producto.programa || !producto.asignatura || !producto.corte || !producto.marcoContex || !producto.pregunta || !producto.opciones || !producto.clave || !producto.justificacion || !producto.docente || !producto.fecha){
-         throw new Error("Datos VACIOS")
-      }
+   if( !producto.fecha || !producto.codigo || !producto.programa || !producto.asignatura ||
+      !producto.corte ||!producto.unidadAprendizaje|| !producto.competenciaEvaluadora ||
+      !producto.marcoContex || !producto.pregunta || !producto.a || !producto.b || !producto.c ||
+      !producto.clave || !producto.evidencia || !producto.justificacion || !producto.diseñado ){
+     console.log("Datos Faltantes al actualizar")
+     }
 
       const productoDetalle= productoRepositorio.detalle(idProducto)
 
+
+      productoDetalle.fecha=producto.fecha
+      productoDetalle.codigo=producto.codigo
       productoDetalle.programa=producto.programa
       productoDetalle.asignatura=producto.asignatura
       productoDetalle.corte=producto.corte
+      productoDetalle.unidadAprendizaje=producto.unidadAprendizaje
+      productoDetalle.competenciaEvaluadora=producto.competenciaEvaluadora
       productoDetalle.marcoContex=producto.marcoContex
       productoDetalle.pregunta=producto.pregunta
-      productoDetalle.opciones=producto.opciones
+      productoDetalle.a=producto.a
+      productoDetalle.b=producto.b
+      productoDetalle.c=producto.c
+      productoDetalle.d=producto.d
       productoDetalle.clave=producto.clave
+      productoDetalle.evidencia=producto.evidencia
       productoDetalle.justificacion=producto.justificacion
-      productoDetalle.docente=producto.docente
-      productoDetalle.fecha=producto.fecha
+      productoDetalle.diseñado=producto.diseñado
+      
 
       await productoRepositorio.actualizar(productoDetalle)
 

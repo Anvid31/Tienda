@@ -1,11 +1,12 @@
 import mysql from 'mysql2/promise';
+import { variables} from "../utils/variables.js"
 
 // Create a connection to the database
 const pool =  mysql.createPool({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'node'
+    host: variables.MYSQL_HOST,
+    user: variables.MYSQL_USER,
+    password: variables.MYSQL_PASSWORD,
+    database: variables.MYSQL_DB,
 });
 
 const conexion = {
@@ -13,7 +14,7 @@ const conexion = {
         try {
             const connection = await pool.getConnection()
 
-            console.log("Conexion Existosa")
+            console.log("Conexion a la Base de datos a sido Realizada con exito")
             connection.release()
 
             return connection

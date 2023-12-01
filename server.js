@@ -1,8 +1,8 @@
 import express from "express"
 import { conexion } from "./db/conexion.js"
 import { variables } from "./utils/variables.js"
-import { rutas } from "./routes/rutas.js"
 import productoRepositorio from "./db/repositorio/productoRepositorio.js"
+import { configuracionSeguridad } from "./routes/config.js"
 
 var app = express()
 
@@ -15,18 +15,23 @@ const host = variables.EXPRESS_HOST
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 
-
-
 conexion
-      .clienteMySQL()
-      .then((connection) => {
-         app.listen(port, host,()=>{
+   .clienteMySQL()
+   .then((connection) => {
+      app
+         .listen(port, host,()=>{
          console.log(`Escuchando por el http://${host}:${port}`)
-         productoRepositorio.crear()
-       })
+         productoRepositorio.crear().then(() => {
+            console.log("Formulario Creado")
+         })
       })
-      .catch((err)=>{
-         console.error("Error al Conectar : ", err)
-         process.exit()
-      })
+   })
+   .catch((err)=>{
+      console.error("Error al Conectar : ", err)
+      process.exit()
+   })
+
+      configuracionSeguridad(app)
+
+     
       
